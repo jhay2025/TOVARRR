@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-key="pageTitle">Catálogo de Servicios - Jonimind Agency</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons CDN for modern icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Custom styles for the Inter font and smooth transitions */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* Light gray background */
+            color: #334155; /* Darker text color */
+        }
+        .icon-container {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 4rem;
+            height: 4rem;
+            border-radius: 9999px; /* Full rounded for circle */
+            background-color: #e0f2fe; /* Light blue background for icons */
+            color: #0ea5e9; /* Blue icon color */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            /* New: Smooth transition for transform */
+            transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out;
+        }
+        .icon-container:hover {
+            transform: translateY(-5px) scale(1.05); /* Slightly move up and scale on hover */
+            background-color: #dbeafe; /* Slightly darker background on hover */
+        }
+        .service-card {
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+        .service-card:hover {
+            transform: translateY(-8px); /* More pronounced slide up on hover */
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15); /* Stronger shadow on hover */
+        }
+        .cta-button {
+            transition: background-color 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+        .cta-button:hover {
+            background-color: #0284c7; /* Darker blue on hover */
+            transform: translateY(-2px);
+        }
+
+        /* Animations for Hero Section */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-down {
+            animation: fadeInDown 1s ease-out forwards;
+        }
+        .animate-fade-in-up {
+            animation: fadeInUp 1s ease-out forwards;
+            animation-delay: 0.3s; /* Delay for a staggered effect */
+            opacity: 0; /* Start hidden */
+        }
+
+        /* Styles for collapsible modules */
+        .service-details-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out; /* Smooth transition for height */
+        }
+        .service-details-content.expanded {
+            max-height: 500px; /* Adjust as needed for content length */
+        }
+        .toggle-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background-color: #f0f9ff; /* Light blue background */
+            color: #0ea5e9; /* Blue icon color */
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            margin-top: 1rem;
+            transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+        }
+        .toggle-button:hover {
+            background-color: #e0f2fe; /* Slightly darker blue on hover */
+            color: #0284c7;
+        }
+        .toggle-button svg {
+            transition: transform 0.3s ease-in-out;
+        }
+        .toggle-button.expanded svg {
+            transform: rotate(180deg);
+        }
+
+        /* Loading spinner for API calls */
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #3b82f6;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 0.5rem;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Game specific styles */
+        .word-display {
+            font-size: 2.5rem;
+            font-weight: bold;
+            letter-spacing: 0.5rem;
+            margin-bottom: 1.5rem;
+            color: #1e293b;
+        }
+        .guessed-letters {
+            font-size: 1.25rem;
+            color: #64748b;
+            margin-bottom: 1rem;
+        }
+        .game-message {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            min-height: 2rem; /* Reserve space to prevent layout shift */
+        }
+        .game-input {
+            width: 6rem;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        /* Mobile Navigation Styles */
+        .mobile-menu-button {
+            display: none; /* Hidden by default, shown on small screens */
+        }
+        .mobile-menu {
+            display: none; /* Hidden by default, shown when toggled */
+            flex-direction: column;
+            width: 100%;
+            background-color: #fff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: absolute;
+            top: 100%; /* Position below the header */
+            left: 0;
+            z-index: 20;
+            padding: 1rem 0;
+        }
+        .mobile-menu.active {
+            display: flex;
+        }
+        .mobile-menu li {
+            width: 100%;
+            text-align: center;
+            padding: 0.75rem 0;
+        }
+        .mobile-menu a {
+            display: block;
+            padding: 0.5rem 1rem;
+            color: #334155;
+            transition: background-color 0.3s ease;
+        }
+        .mobile-menu a:hover {
+            background-color: #f0f9ff;
+            color: #0ea5e9;
+        }
+
+        @media (max-width: 768px) { /* Adjust breakpoint as needed */
+            .main-nav {
+                display: none; /* Hide desktop nav on small screens */
+            }
+            .mobile-menu-button {
+                display: block; /* Show hamburger button */
+            }
+            .header-content {
+                justify-content: space-between; /* Space out logo and button */
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <!-- Header Section -->
+    <header class="bg-white shadow-md py-6 px-4 sm:px-6 lg:px-8 rounded-b-lg relative">
+        <div class="max-w-7xl mx-auto flex justify-between items-center header-content">
+            <h1 class="text-3xl font-extrabold text-gray-900">
+                Jonimind Agency
+            </h1>
+            <nav class="flex items-center space-x-6 main-nav">
+                <ul class="flex space-x-6">
+                    <li><a href="#servicios" class="text-gray-600 hover:text-blue-600 font-medium transition duration-300" data-key="navServices">Servicios</a></li>
+                    <li><a href="#slogan-generator" class="text-gray-600 hover:text-blue-600 font-medium transition duration-300" data-key="navSloganGenerator">Generador de Slogans</a></li>
+                    <li><a href="#guess-the-word-game" class="text-gray-600 hover:text-blue-600 font-medium transition duration-300" data-key="navGuessTheWordGame">Adivina la Palabra</a></li>
+                    <li><a href="#testimonios" class="text-gray-600 hover:text-blue-600 font-medium transition duration-300" data-key="navTestimonials">Testimonios</a></li>
+                    <li><a href="#porque-elegirnos" class="text-gray-600 hover:text-blue-600 font-medium transition duration-300" data-key="navWhyChooseUs">¿Por qué elegirnos?</a></li>
+                    <li><a href="#contacto" class="text-gray-600 hover:text-blue-600 font-medium transition duration-300" data-key="navContact">Contacto</a></li>
+                </ul>
+                <!-- Language Switcher -->
+                <div class="flex space-x-2 ml-4">
+                    <button id="lang-es" class="px-3 py-1 rounded-md text-sm font-medium bg-blue-500 text-white hover:bg-blue-600 transition duration-300">ES</button>
+                    <button id="lang-pt-br" class="px-3 py-1 rounded-md text-sm font-medium bg-gray-200 text-gray-700 hover:bg-gray-300 transition duration-300">PT-BR</button>
+                </div>
+            </nav>
+            <!-- Mobile Menu Button -->
+            <button id="mobile-menu-button" class="mobile-menu-button p-2 rounded-md text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <i data-lucide="menu" class="w-7 h-7"></i>
+            </button>
+        </div>
+        <!-- Mobile Menu (initially hidden) -->
+        <nav id="mobile-menu" class="mobile-menu">
+            <ul>
+                <li><a href="#servicios" class="text-gray-600 hover:text-blue-600 font-medium transition duration-300" data-key="navServices">Servicios</a></li>
+                <li><a href="#slogan-generator" class="text-gray-600 hover:text-blue-600 font-medium transition duration-300" data-key="navSloganGenerator">Generador de Slogans</a></li>
+                <li><a href="#guess-the-word-game" class="text-gray-600 hover:text-blue-600 font-medium transition duration-300" data-key="navGuessTheWordGame">Adivina la Palabra</a></li>
+                <li><a href="#testimonios" class="text-gray-600 hover:text-blue-600 font-medium transition duration-300" data-key="navTestimonials">Testimonios</a></li>
+                <li><a href="#porque-elegirnos" class="text-gray-600 hover:text-blue-600 font-medium transition duration-300" data-key="navWhyChooseUs">¿Por qué elegirnos?</a></li>
+                <li><a href="#contacto" class="text-gray-600 hover:text-blue-600 font-medium transition duration-300" data-key="navContact">Contacto</a></li>
+            </ul>
+            <div class="flex justify-center space-x-2 mt-4">
+                <button id="mobile-lang-es" class="px-3 py-1 rounded-md text-sm font-medium bg-blue-500 text-white hover:bg-blue-600 transition duration-300">ES</button>
+                <button id="mobile-lang-pt-br" class="px-3 py-1 rounded-md text-sm font-medium bg-gray-200 text-gray-700 hover:bg-gray-300 transition duration-300">PT-BR</button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="relative bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-20 px-4 sm:px-6 lg:px-8 rounded-lg shadow-lg mt-8 mx-4 sm:mx-auto max-w-7xl overflow-hidden">
+        <div class="absolute inset-0 opacity-20">
+            <!-- Image of a person coding on a laptop, representing web development -->
+            <img src="https://images.pexels.com/photos/546819/pexels-photo-546819.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Código en una pantalla de computadora, representando el desarrollo web" class="w-full h-full object-cover">
+        </div>
+        <div class="relative z-10 text-center">
+            <h2 class="text-5xl sm:text-6xl font-extrabold leading-tight mb-6 animate-fade-in-down" data-key="heroTitle">
+                Transforma tu Visión en Realidad Digital
+            </h2>
+            <p class="text-xl sm:text-2xl mb-8 max-w-3xl mx-auto opacity-90 animate-fade-in-up" data-key="heroSubtitle">
+                En Jonimind Agency, creamos experiencias web y móviles innovadoras que impulsan tu negocio y conectan con tu audiencia.
+            </p>
+            <a href="#contacto" class="inline-block bg-white text-blue-700 hover:bg-gray-100 font-bold py-4 px-8 rounded-full shadow-lg text-lg uppercase tracking-wide cta-button"
+               data-key="heroCta" onmouseover="this.textContent=translations[currentLang]['heroCtaHover']" onmouseout="this.textContent=translations[currentLang]['heroCta']">
+                Solicita una Consulta Gratuita
+            </a>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="servicios" class="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <h3 class="text-4xl font-extrabold text-center text-gray-900 mb-12" data-key="servicesSectionTitle">Nuestros Servicios Estratégicos</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+            <!-- Service Card 1: Desarrollo Web a Medida -->
+            <div class="bg-white p-8 rounded-xl shadow-lg border border-gray-100 service-card">
+                <div class="icon-container mb-6">
+                    <i data-lucide="laptop" class="w-8 h-8"></i>
+                </div>
+                <h4 class="text-2xl font-bold text-gray-900 mb-4" data-key="service1Title">Desarrollo Web a Medida</h4>
+                <p class="text-gray-600 mb-4" data-key="service1ShortDesc">Tu sitio web actual es obsoleto, lento o no es responsive. Estás perdiendo clientes potenciales y credibilidad online.</p>
+                <div class="service-details-content">
+                    <p class="text-gray-700 font-medium" data-key="service1LongDesc">Creamos sitios web personalizados, visualmente impactantes, altamente funcionales y optimizados para UX y SEO. Desde sitios corporativos hasta e-commerce robustos.</p>
+                    <ul class="list-disc list-inside text-sm text-gray-500 mt-4">
+                        <li data-key="service1Feature1">Diseño UX/UI</li>
+                        <li data-key="service1Feature2">Desarrollo Frontend y Backend</li>
+                        <li data-key="service1Feature3">Integración CMS</li>
+                        <li data-key="service1Feature4">Optimización SEO</li>
+                    </ul>
+                </div>
+                <button class="toggle-button" data-key="toggleButton">
+                    Ver más <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Service Card 2: Desarrollo de Aplicaciones Móviles -->
+            <div class="bg-white p-8 rounded-xl shadow-lg border border-gray-100 service-card">
+                <div class="icon-container mb-6">
+                    <i data-lucide="smartphone" class="w-8 h-8"></i>
+                </div>
+                <h4 class="text-2xl font-bold text-gray-900 mb-4" data-key="service2Title">Desarrollo de Aplicaciones Móviles</h4>
+                <p class="text-gray-600 mb-4" data-key="service2ShortDesc">Tus clientes viven en sus teléfonos. Si tu negocio no está en sus bolsillos, estás perdiendo una conexión directa.</p>
+                <div class="service-details-content">
+                    <p class="text-gray-700 font-medium" data-key="service2LongDesc">Diseñamos y desarrollamos aplicaciones móviles nativas (iOS y Android) e híbridas, ofreciendo una experiencia de usuario fluida e intuitiva.</p>
+                    <ul class="list-disc list-inside text-sm text-gray-500 mt-4">
+                        <li data-key="service2Feature1">Consultoría y Conceptualización</li>
+                        <li data-key="service2Feature2">Diseño UX/UI para Móviles</li>
+                        <li data-key="service2Feature3">Desarrollo Nativo/Híbrido</li>
+                        <li data-key="service2Feature4">Pruebas y Publicación</li>
+                    </ul>
+                </div>
+                <button class="toggle-button" data-key="toggleButton">
+                    Ver más <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Service Card 3: Optimización y Rendimiento Web -->
+            <div class="bg-white p-8 rounded-xl shadow-lg border border-gray-100 service-card">
+                <div class="icon-container mb-6">
+                    <i data-lucide="gauge" class="w-8 h-8"></i>
+                </div>
+                <h4 class="text-2xl font-bold text-gray-900 mb-4" data-key="service3Title">Optimización y Rendimiento Web</h4>
+                <p class="text-gray-600 mb-4" data-key="service3ShortDesc">Páginas lentas y navegación confusa ahuyentan a los visitantes. Estás invirtiendo en tráfico sin ver resultados.</p>
+                <div class="service-details-content">
+                    <p class="text-gray-700 font-medium" data-key="service3LongDesc">Analizamos y optimizamos tu plataforma digital para mejorar la velocidad de carga, la usabilidad y la tasa de conversión, transformando visitantes en clientes.</p>
+                    <ul class="list-disc list-inside text-sm text-gray-500 mt-4">
+                        <li data-key="service3Feature1">Auditorías de Rendimiento</li>
+                        <li data-key="service3Feature2">Optimización de Velocidad</li>
+                        <li data-key="service3Feature3">Mejora de la Experiencia de Usuario (UX)</li>
+                        <li data-key="service3Feature4">Estrategias CRO</li>
+                    </ul>
+                </div>
+                <button class="toggle-button" data-key="toggleButton">
+                    Ver más <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Service Card 4: Consultoría Digital y Estrategia Tecnológica -->
+            <div class="bg-white p-8 rounded-xl shadow-lg border border-gray-100 service-card">
+                <div class="icon-container mb-6">
+                    <i data-lucide="lightbulb" class="w-8 h-8"></i>
+                </div>
+                <h4 class="text-2xl font-bold text-gray-900 mb-4" data-key="service4Title">Consultoría Digital y Estrategia</h4>
+                <p class="text-gray-600 mb-4" data-key="service4ShortDesc">Necesitas innovar digitalmente, pero no sabes por dónde empezar. Las opciones tecnológicas son abrumadoras.</p>
+                <div class="service-details-content">
+                    <p class="text-gray-700 font-medium" data-key="service4LongDesc">Actuamos como tu asesor tecnológico de confianza, ayudándote a definir tu estrategia digital y a tomar decisiones informadas que se alineen con tus objetivos.</p>
+                    <ul class="list-disc list-inside text-sm text-gray-500 mt-4">
+                        <li data-key="service4Feature1">Análisis de Requerimientos</li>
+                        <li data-key="service4Feature2">Selección de Tecnologías</li>
+                        <li data-key="service4Feature3">Planificación de Proyectos</li>
+                        <li data-key="service4Feature4">Arquitectura de Soluciones</li>
+                    </ul>
+                </div>
+                <button class="toggle-button" data-key="toggleButton">
+                    Ver más <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Service Card 5: Integración de Sistemas y Automatización -->
+            <div class="bg-white p-8 rounded-xl shadow-lg border border-gray-100 service-card">
+                <div class="icon-container mb-6">
+                    <i data-lucide="workflow" class="w-8 h-8"></i>
+                </div>
+                <h4 class="text-2xl font-bold text-gray-900 mb-4" data-key="service5Title">Integración de Sistemas y Automatización</h4>
+                <p class="text-gray-600 mb-4" data-key="service5ShortDesc">Tus sistemas no se comunican, creando silos de información y errores manuales. Estás perdiendo tiempo y recursos.</p>
+                <div class="service-details-content">
+                    <p class="text-gray-700 font-medium" data-key="service5LongDesc">Desarrollamos soluciones de integración personalizadas que conectan tus sistemas, automatizan flujos de trabajo y centralizan tu información.</p>
+                    <ul class="list-disc list-inside text-sm text-gray-500 mt-4">
+                        <li data-key="service5Feature1">Integración de APIs</li>
+                        <li data-key="service5Feature2">Desarrollo de Conectores</li>
+                        <li data-key="service5Feature3">Automatización de Procesos</li>
+                        <li data-key="service5Feature4">Migración de Datos</li>
+                    </ul>
+                </div>
+                <button class="toggle-button" data-key="toggleButton">
+                    Ver más <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Chuck Norris Joke of the Day Section -->
+    <section class="bg-gray-100 py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto rounded-lg shadow-md mt-8 text-center">
+        <h3 class="text-3xl font-extrabold text-gray-900 mb-6" data-key="jokeSectionTitle">Chiste de Chuck Norris del Día</h3>
+        <div class="bg-white p-8 rounded-xl shadow-inner max-w-3xl mx-auto">
+            <p class="text-xl italic text-gray-700 mb-4" id="joke-content" data-key="jokeContent">Cargando chiste...</p>
+            <button id="new-joke-button" class="mt-6 px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition duration-300 shadow-md" data-key="newJokeButton">
+                Nuevo Chiste
+            </button>
+        </div>
+    </section>
+
+    <!-- Slogan Generator Section (Powered by Gemini API) -->
+    <section id="slogan-generator" class="bg-blue-50 py-16 px-4 sm:px-6 lg:px-8 rounded-lg shadow-inner mt-8 mx-4 sm:mx-auto max-w-7xl">
+        <h3 class="text-4xl font-extrabold text-center text-gray-900 mb-12" data-key="sloganGenTitle">Generador de Slogans ✨</h3>
+        <div class="bg-white p-8 rounded-xl shadow-lg border border-gray-100 max-w-3xl mx-auto">
+            <p class="text-gray-700 mb-6" data-key="sloganGenDescription">Introduce el nombre de tu empresa o producto y una breve descripción para generar slogans creativos.</p>
+            <input type="text" id="company-name-input" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 mb-4" data-key="companyNamePlaceholder" placeholder="Nombre de la empresa/producto">
+            <textarea id="company-description-input" class="w-full p-4 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 mb-4 resize-y" rows="3" data-key="companyDescPlaceholder" placeholder="Ej: Agencia de marketing digital, software de gestión de proyectos, cafetería artesanal"></textarea>
+            <button id="generate-slogans-button" class="w-full px-6 py-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition duration-300 shadow-md flex items-center justify-center" data-key="generateSlogansButton">
+                Generar Slogans ✨
+                <span id="slogan-spinner" class="spinner ml-2 hidden"></span>
+            </button>
+            <div id="slogan-output" class="mt-8 p-6 bg-gray-50 rounded-lg border border-gray-200 min-h-[100px] text-gray-800 whitespace-pre-wrap">
+                <!-- Slogans will be displayed here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Guess The Word Game Section -->
+    <section id="guess-the-word-game" class="bg-gray-100 py-16 px-4 sm:px-6 lg:px-8 rounded-lg shadow-inner mt-8 mx-4 sm:mx-auto max-w-7xl text-center">
+        <h3 class="text-4xl font-extrabold text-gray-900 mb-12" data-key="gameTitle">Adivina la Palabra 🧠</h3>
+        <div class="bg-white p-8 rounded-xl shadow-lg border border-gray-100 max-w-xl mx-auto">
+            <p class="text-gray-700 mb-6" data-key="gameDescription">Intenta adivinar la palabra oculta letra a letra. ¡Buena suerte!</p>
+            <div id="word-display" class="word-display mb-4"></div>
+            <p id="guessed-letters-display" class="guessed-letters mb-4" data-key="guessedLettersLabel">Letras adivinadas: </p>
+            <p id="attempts-left-display" class="text-gray-600 text-lg mb-6" data-key="attemptsLeftLabel">Intentos restantes: </p>
+            
+            <div class="flex justify-center items-center gap-4 mb-6">
+                <input type="text" id="letter-input" maxlength="1" class="game-input p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 uppercase" data-key="letterInputPlaceholder" placeholder="Letra">
+                <button id="guess-button" class="px-6 py-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition duration-300 shadow-md" data-key="guessButton">
+                    Adivinar
+                </button>
+            </div>
+            
+            <p id="game-message" class="game-message text-red-600"></p>
+            
+            <button id="new-game-button" class="mt-8 px-6 py-3 bg-green-600 text-white rounded-full hover:bg-green-700 transition duration-300 shadow-md hidden" data-key="newGameButton">
+                Nuevo Juego
+            </button>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonios" class="bg-blue-50 py-16 px-4 sm:px-6 lg:px-8 rounded-lg shadow-inner mt-8 mx-4 sm:mx-auto max-w-7xl">
+        <h3 class="text-4xl font-extrabold text-center text-gray-900 mb-12" data-key="testimonialsTitle">Lo que dicen nuestros clientes</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Testimonial Card 1 -->
+            <div class="bg-white p-8 rounded-xl shadow-lg border border-gray-100 flex flex-col items-center text-center">
+                <img src="https://placehold.co/80x80/e0f2fe/0ea5e9?text=Cliente1" alt="Imagen de un cliente feliz" class="w-20 h-20 rounded-full mb-4 object-cover">
+                <p class="text-lg italic text-gray-700 mb-4" data-key="testimonial1Quote">"Jonimind Agency transformó nuestra presencia online. Su equipo es profesional, creativo y siempre superó nuestras expectativas."</p>
+                <p class="font-semibold text-gray-900" data-key="testimonial1Author">- Ana G., CEO de TechSolutions</p>
+            </div>
+            <!-- Testimonial Card 2 -->
+            <div class="bg-white p-8 rounded-xl shadow-lg border border-gray-100 flex flex-col items-center text-center">
+                <img src="https://placehold.co/80x80/e0f2fe/0ea5e9?text=Cliente2" alt="Imagen de un cliente feliz" class="w-20 h-20 rounded-full mb-4 object-cover">
+                <p class="text-lg italic text-gray-700 mb-4" data-key="testimonial2Quote">"Su enfoque estratégico nos ayudó a lanzar nuestra app con éxito. ¡Resultados increíbles y un soporte inmejorable!"</p>
+                <p class="font-semibold text-gray-900" data-key="testimonial2Author">- Carlos M., Fundador de AppInnovate</p>
+            </div>
+            <!-- Testimonial Card 3 -->
+            <div class="bg-white p-8 rounded-xl shadow-lg border border-gray-100 flex flex-col items-center text-center">
+                <img src="https://placehold.co/80x80/e0f2fe/0ea5e9?text=Cliente3" alt="Imagen de un cliente feliz" class="w-20 h-20 rounded-full mb-4 object-cover">
+                <p class="text-lg italic text-gray-700 mb-4" data-key="testimonial3Quote">"La optimización de nuestro sitio web fue fenomenal. Vimos un aumento significativo en el tráfico y las conversiones."</p>
+                <p class="font-semibold text-gray-900" data-key="testimonial3Author">- Sofía L., Directora de Marketing de EcoShop</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Choose Us Section -->
+    <section id="porque-elegirnos" class="bg-blue-50 py-16 px-4 sm:px-6 lg:px-8 rounded-lg shadow-inner mt-8 mx-4 sm:mx-auto max-w-7xl">
+        <h3 class="text-4xl font-extrabold text-center text-gray-900 mb-12" data-key="whyChooseUsTitle">¿Por qué elegir Jonimind Agency?</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="flex items-start p-6 bg-white rounded-xl shadow-md border border-gray-100">
+                <div class="icon-container mr-4 flex-shrink-0">
+                    <i data-lucide="target" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h4 class="text-xl font-semibold text-gray-900 mb-2" data-key="whyChooseUs1Title">Enfoque Estratégico</h4>
+                    <p class="text-gray-600" data-key="whyChooseUs1Desc">No solo codificamos; entendemos tu negocio y tus objetivos para ofrecer soluciones que realmente importan.</p>
+                </div>
+            </div>
+            <div class="flex items-start p-6 bg-white rounded-xl shadow-md border border-gray-100">
+                <div class="icon-container mr-4 flex-shrink-0">
+                    <i data-lucide="rocket" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h4 class="text-xl font-semibold text-gray-900 mb-2" data-key="whyChooseUs2Title">Innovación Constante</h4>
+                    <p class="text-gray-600" data-key="whyChooseUs2Desc">Siempre a la vanguardia de las últimas tecnologías y tendencias para asegurar que tu negocio esté un paso adelante.</p>
+                </div>
+            </div>
+            <div class="flex items-start p-6 bg-white rounded-xl shadow-md border border-gray-100">
+                <div class="icon-container mr-4 flex-shrink-0">
+                    <i data-lucide="user-check" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h4 class="text-xl font-semibold text-gray-900 mb-2" data-key="whyChooseUs3Title">Diseño Centrado en el Usuario</h4>
+                    <p class="text-gray-600" data-key="whyChooseUs3Desc">Creamos experiencias intuitivas y atractivas que tus clientes amarán, garantizando una alta usabilidad.</p>
+                </div>
+            </div>
+            <div class="flex items-start p-6 bg-white rounded-xl shadow-md border border-gray-100">
+                <div class="icon-container mr-4 flex-shrink-0">
+                    <i data-lucide="bar-chart-2" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h4 class="text-xl font-semibold text-gray-900 mb-2" data-key="whyChooseUs4Title">Resultados Medibles</h4>
+                    <p class="text-gray-600" data-key="whyChooseUs4Desc">Desarrollamos soluciones que generan un impacto real en tu crecimiento y rentabilidad, con métricas claras.</p>
+                </div>
+            </div>
+            <div class="flex items-start p-6 bg-white rounded-xl shadow-md border border-gray-100">
+                <div class="icon-container mr-4 flex-shrink-0">
+                    <i data-lucide="life-buoy" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h4 class="text-xl font-semibold text-gray-900 mb-2" data-key="whyChooseUs5Title">Soporte Dedicado</h4>
+                    <p class="text-gray-600" data-key="whyChooseUs5Desc">Un equipo comprometido con tu éxito a largo plazo, ofreciendo soporte y mantenimiento continuo.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contacto" class="bg-gradient-to-r from-blue-700 to-indigo-800 text-white py-20 px-4 sm:px-6 lg:px-8 text-center rounded-lg shadow-lg mt-8 mb-8 mx-4 sm:mx-auto max-w-7xl">
+        <h3 class="text-4xl sm:text-5xl font-extrabold mb-6" data-key="ctaTitle">¡Hablemos de tu próximo gran proyecto digital!</h3>
+        <p class="text-xl sm:text-2xl mb-10 max-w-3xl mx-auto opacity-90" data-key="ctaSubtitle">
+            Contacta con Jonimind Agency hoy mismo para una consulta gratuita y descubre cómo podemos transformar tu presencia digital.
+        </p>
+        <div class="max-w-xl mx-auto bg-white p-8 rounded-xl shadow-lg text-gray-800">
+            <!-- IMPORTANT: Reemplaza 'yourformid' con el ID real de tu formulario de Formspree -->
+            <form id="contact-form" action="https://formspree.io/f/meozkeva" method="POST" class="space-y-6">
+                <div>
+                    <label for="name" class="block text-left text-lg font-medium text-gray-700 mb-2" data-key="contactNameLabel">Nombre:</label>
+                    <input type="text" id="name" name="name" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label for="email" class="block text-left text-lg font-medium text-gray-700 mb-2" data-key="contactEmailLabel">Email:</label>
+                    <input type="email" id="email" name="_replyto" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label for="message" class="block text-left text-lg font-medium text-gray-700 mb-2" data-key="contactMessageLabel">Mensaje:</label>
+                    <textarea id="message" name="message" rows="5" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 resize-y"></textarea>
+                </div>
+                <button type="submit" class="w-full px-6 py-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition duration-300 shadow-md cta-button" data-key="contactSubmitButton">
+                    Enviar Mensaje
+                </button>
+                <div id="form-message" class="mt-4 text-center text-lg font-semibold"></div>
+            </form>
+            <p class="text-center text-gray-600 mt-6" data-key="contactOrEmail">O envíanos un email directamente a:</p>
+            <a href="mailto:info@tudominio.com" class="inline-block text-blue-600 hover:underline mt-2 text-lg" data-key="contactEmailLink">info@tudominio.com</a>
+        </div>
+    </section>
+
+    <!-- Footer Section -->
+    <footer class="bg-gray-800 text-white py-8 px-4 sm:px-6 lg:px-8 text-center rounded-t-lg">
+        <div class="max-w-7xl mx-auto">
+            <p data-key="footerCopyright">&copy; 2025 Jonimind Agency. Todos los derechos reservados.</p>
+            <div class="flex justify-center space-x-6 mt-4">
+                <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                    <i data-lucide="linkedin" class="w-6 h-6"></i>
+                </a>
+                <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                    <i data-lucide="twitter" class="w-6 h-6"></i>
+                </a>
+                <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                    <i data-lucide="facebook" class="w-6 h-6"></i>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Initialize Lucide Icons and JavaScript Logic -->
+    <script>
+        // Translations object
+        const translations = {
+            'es': {
+                pageTitle: 'Catálogo de Servicios - Jonimind Agency',
+                navServices: 'Servicios',
+                navWhyChooseUs: '¿Por qué elegirnos?',
+                navContact: 'Contacto',
+                navSloganGenerator: 'Generador de Slogans',
+                navGuessTheWordGame: 'Adivina la Palabra',
+                navTestimonials: 'Testimonios', // New nav item
+                heroTitle: 'Transforma tu Visión en Realidad Digital',
+                heroSubtitle: 'En Jonimind Agency, creamos experiencias web y móviles innovadoras que impulsan tu negocio y conectan con tu audiencia.',
+                heroCta: 'Solicita una Consulta Gratuita',
+                heroCtaHover: '¡Empecemos!',
+                servicesSectionTitle: 'Nuestros Servicios Estratégicos',
+                service1Title: 'Desarrollo Web a Medida',
+                service1ShortDesc: 'Tu sitio web actual es obsoleto, lento o no es responsive. Estás perdiendo clientes potenciales y credibilidad online.',
+                service1LongDesc: 'Creamos sitios web personalizados, visualmente impactantes, altamente funcionales y optimizados para UX y SEO. Desde sitios corporativos hasta e-commerce robustos.',
+                service1Feature1: 'Diseño UX/UI',
+                service1Feature2: 'Desarrollo Frontend y Backend',
+                service1Feature3: 'Integración CMS',
+                service1Feature4: 'Optimización SEO',
+                service2Title: 'Desarrollo de Aplicaciones Móviles',
+                service2ShortDesc: 'Tus clientes viven en sus teléfonos. Si tu negocio no está en sus bolsillos, estás perdiendo una conexión directa.',
+                service2LongDesc: 'Diseñamos y desarrollamos aplicaciones móviles nativas (iOS y Android) e híbridas, ofreciendo una experiencia de usuario fluida e intuitiva.',
+                service2Feature1: 'Consultoría y Conceptualización',
+                service2Feature2: 'Diseño UX/UI para Móviles',
+                service2Feature3: 'Desarrollo Nativo/Híbrido',
+                service2Feature4: 'Pruebas y Publicación',
+                service3Title: 'Optimización y Rendimiento Web',
+                service3ShortDesc: 'Páginas lentas y navegación confusa ahuyentan a los visitantes. Estás invirtiendo en tráfico sin ver resultados.',
+                service3LongDesc: 'Analizamos y optimizamos tu plataforma digital para mejorar la velocidad de carga, la usabilidad y la tasa de conversión, transformando visitantes en clientes.',
+                service3Feature1: 'Auditorías de Rendimiento',
+                service3Feature2: 'Optimización de Velocidad',
+                service3Feature3: 'Mejora de la Experiencia de Usuario (UX)',
+                service3Feature4: 'Estrategias CRO',
+                service4Title: 'Consultoría Digital y Estrategia',
+                service4ShortDesc: 'Necesitas innovar digitalmente, pero no sabes por dónde empezar. Las opciones tecnológicas son abrumadoras.',
+                service4LongDesc: 'Actuamos como tu asesor tecnológico de confianza, ayudándote a definir tu estrategia digital y a tomar decisiones informadas que se alineen con tus objetivos.',
+                service4Feature1: 'Análisis de Requerimientos',
+                service4Feature2: 'Selección de Tecnologías',
+                service4Feature3: 'Planificación de Proyectos',
+                service4Feature4: 'Arquitectura de Soluciones',
+                service5Title: 'Integración de Sistemas y Automatización',
+                service5ShortDesc: 'Tus sistemas no se comunican, creando silos de información y errores manuales. Estás perdiendo tiempo y recursos.',
+                service5LongDesc: 'Desarrollamos soluciones de integración personalizadas que conectan tus sistemas, automatizan flujos de trabajo y centralizan tu información.',
+                service5Feature1: 'Integración de APIs',
+                service5Feature2: 'Desarrollo de Conectores',
+                service5Feature3: 'Automatización de Procesos',
+                service5Feature4: 'Migración de Datos',
+                toggleButton: 'Ver más',
+                toggleButtonLess: 'Ver menos',
+                whyChooseUsTitle: '¿Por qué elegir Jonimind Agency?',
+                whyChooseUs1Title: 'Enfoque Estratégico',
+                whyChooseUs1Desc: 'No solo codificamos; entendemos tu negocio y tus objetivos para ofrecer soluciones que realmente importan.',
+                service5Feature1: 'Integración de APIs',
+                service5Feature2: 'Desarrollo de Conectores',
+                service5Feature3: 'Automatización de Procesos',
+                service5Feature4: 'Migración de Datos',
+                whyChooseUs2Title: 'Innovación Constante',
+                whyChooseUs2Desc: 'Siempre a la vanguardia de las últimas tecnologías y tendencias para asegurar que tu negocio esté un paso adelante.',
+                whyChooseUs3Title: 'Diseño Centrado en el Usuario',
+                whyChooseUs3Desc: 'Creamos experiencias intuitivas y atractivas que tus clientes amarán, garantizando una alta usabilidad.',
+                whyChooseUs4Title: 'Resultados Medibles',
+                whyChooseUs4Desc: 'Desarrollamos soluciones que generan un impacto real en tu crecimiento y rentabilidad, con métricas claras.',
+                whyChooseUs5Title: 'Soporte Dedicado',
+                whyChooseUs5Desc: 'Un equipo comprometido con tu éxito a largo plazo, ofreciendo soporte y mantenimiento continuo.',
+                ctaTitle: '¡Hablemos de tu próximo gran proyecto digital!',
+                ctaSubtitle: 'Contacta con Jonimind Agency hoy mismo para una consulta gratuita y descubre cómo podemos transformar tu presencia digital.',
+                ctaButton: 'Contáctanos Hoy',
+                ctaButtonHover: '¡Envía un Email Ahora!',
+                footerCopyright: '&copy; 2025 Jonimind Agency. Todos los derechos reservados.',
+                jokeSectionTitle: 'Chiste de Chuck Norris del Día',
+                jokeContent: 'Cargando chiste...',
+                newJokeButton: 'Nuevo Chiste',
+                translatingJoke: 'Traduciendo chiste...',
+                fetchError: 'Error al cargar el contenido. Esto podría deberse a restricciones de red o del entorno. Por favor, inténtalo de nuevo más tarde.',
+                sloganGenTitle: 'Generador de Slogans ✨',
+                sloganGenDescription: 'Introduce el nombre de tu empresa o producto y una breve descripción para generar slogans creativos.',
+                companyNamePlaceholder: 'Nombre de la empresa/producto',
+                companyDescPlaceholder: 'Ej: Agencia de marketing digital, software de gestión de proyectos, cafetería artesanal',
+                generateSlogansButton: 'Generar Slogans ✨',
+                generatingSlogans: 'Generando slogans...',
+                noSloganInputError: 'Por favor, introduce el nombre y la descripción de la empresa/producto.',
+                // Game specific translations
+                gameTitle: 'Adivina la Palabra 🧠',
+                gameDescription: 'Intenta adivinar la palabra oculta letra a letra. ¡Buena suerte!',
+                guessedLettersLabel: 'Letras adivinadas: ',
+                attemptsLeftLabel: 'Intentos restantes: ',
+                letterInputPlaceholder: 'Letra',
+                guessButton: 'Adivinar',
+                newGameButton: 'Nuevo Juego',
+                gameMessageWin: '¡Felicidades! ¡Has adivinado la palabra!',
+                gameMessageLose: '¡Oh no! Te quedaste sin intentos. La palabra era: ',
+                gameMessageAlreadyGuessed: 'Ya adivinaste esa letra. Intenta con otra.',
+                gameMessageInvalidInput: 'Por favor, introduce una sola letra válida.',
+                gameMessageCorrectGuess: '¡Correcto!',
+                gameMessageIncorrectGuess: 'Incorrecto. Intenta de nuevo.',
+                // Testimonials
+                testimonialsTitle: 'Lo que dicen nuestros clientes',
+                testimonial1Quote: '"Jonimind Agency transformó nuestra presencia online. Su equipo es profesional, creativo y siempre superó nuestras expectativas."',
+                testimonial1Author: '- Ana G., CEO de TechSolutions',
+                testimonial2Quote: '"Su enfoque estratégico nos ayudó a lanzar nuestra app con éxito. ¡Resultados increíbles y un soporte inmejorable!"',
+                testimonial2Author: '- Carlos M., Fundador de AppInnovate',
+                testimonial3Quote: '"La optimización de nuestro sitio web fue fenomenal. Vimos un aumento significativo en el tráfico y las conversiones."',
+                testimonial3Author: '- Sofía L., Directora de Marketing de EcoShop',
+                // Contact Form
+                contactNameLabel: 'Nombre:',
+                contactEmailLabel: 'Email:',
+                contactMessageLabel: 'Mensaje:',
+                contactSubmitButton: 'Enviar Mensaje',
+                contactOrEmail: 'O envíanos un email directamente a:',
+                contactEmailLink: 'info@tudominio.com',
+                formSuccessMessage: '¡Mensaje enviado con éxito! Nos pondremos en contacto contigo pronto.',
+                formErrorMessage: 'Hubo un error al enviar tu mensaje. Por favor, inténtalo de nuevo más tarde.',
+            },
+            'pt-br': {
+                pageTitle: 'Catálogo de Serviços - Jonimind Agency',
+                navServices: 'Serviços',
+                navWhyChooseUs: 'Por que nos escolher?',
+                navContact: 'Contato',
+                navSloganGenerator: 'Gerador de Slogans',
+                navGuessTheWordGame: 'Adivinhe a Palavra',
+                navTestimonials: 'Depoimentos', // New nav item
+                heroTitle: 'Transforme sua Visão em Realidade Digital',
+                heroSubtitle: 'Na Jonimind Agency, criamos experiências web e móveis inovadoras que impulsionam seu negócio e conectam com sua audiência.',
+                heroCta: 'Solicite uma Consulta Gratuita',
+                heroCtaHover: 'Vamos começar!',
+                servicesSectionTitle: 'Nossos Serviços Estratégicos',
+                service1Title: 'Desenvolvimento Web Personalizado',
+                service1ShortDesc: 'Seu site atual está obsoleto, lento ou não é responsivo. Você está perdendo clientes em potencial e credibilidade online.',
+                service1LongDesc: 'Criamos sites personalizados, visualmente impactantes, altamente funcionais e otimizados para UX e SEO. De sites corporativos a e-commerce robustos.',
+                service1Feature1: 'Design UX/UI',
+                service1Feature2: 'Desenvolvimento Frontend e Backend',
+                service1Feature3: 'Integración CMS',
+                service1Feature4: 'Otimização SEO',
+                service2Title: 'Desenvolvimento de Aplicativos Móviles',
+                service2ShortDesc: 'Seus clientes vivem em seus telefones. Se seu negócio não está em seus bolsos, você está perdendo uma conexão direta.',
+                service2LongDesc: 'Projetamos e desenvolvemos aplicativos móveis nativos (iOS e Android) e híbridos, oferecendo uma experiência de usuário fluida e intuitiva.',
+                service2Feature1: 'Consultoria e Conceituação',
+                service2Feature2: 'Design UX/UI para Móviles',
+                service2Feature3: 'Desenvolvimento Nativo/Híbrido',
+                service2Feature4: 'Testes e Publicação',
+                service3Title: 'Otimização e Performance Web',
+                service3ShortDesc: 'Páginas lentas e navegação confusa afastam os visitantes. Você está investindo em tráfego sem ver resultados.',
+                service3LongDesc: 'Analizamos e otimizamos sua plataforma digital para melhorar a velocidade de carregamento, usabilidade e taxa de conversão, transformando visitantes em clientes.',
+                service3Feature1: 'Auditorias de Desempenho',
+                service3Feature2: 'Otimização de Velocidade',
+                service3Feature3: 'Melhoria da Experiência do Usuário (UX)',
+                service3Feature4: 'Estratégias CRO',
+                service4Title: 'Consultoria Digital e Estratégia Tecnológica',
+                service4ShortDesc: 'Você precisa inovar digitalmente, mas não sabe por onde começar. As opções tecnológicas são avassaladoras.',
+                service4LongDesc: 'Atuamos como seu consultor tecnológico de confiança, ajudando você a definir sua estratégia digital e a tomar decisões informadas que se alinhem aos seus objetivos.',
+                service4Feature1: 'Análise de Requisitos',
+                service4Feature2: 'Seleção de Tecnologias',
+                service4Feature3: 'Planejamento de Projetos',
+                service4Feature4: 'Arquitetura de Soluções',
+                service5Title: 'Integración de Sistemas e Automação',
+                service5ShortDesc: 'Seus sistemas não se comunicam, criando silos de informação e erros manuais. Você está perdendo tempo e recursos.',
+                service5LongDesc: 'Desenvolvemos soluções de integração personalizadas que conectam seus sistemas, automatizam fluxos de trabalho e centralizam suas informações.',
+                service5Feature1: 'Integración de APIs',
+                service5Feature2: 'Desenvolvimento de Conectores',
+                service5Feature3: 'Automação de Processos',
+                service5Feature4: 'Migración de Dados',
+                toggleButton: 'Ver más',
+                toggleButtonLess: 'Ver menos',
+                whyChooseUsTitle: 'Por que escolher a Jonimind Agency?',
+                whyChooseUs1Title: 'Foco Estratégico',
+                whyChooseUs1Desc: 'Não apenas codificamos; entendemos seu negócio e seus objetivos para oferecer soluções que realmente importam.',
+                whyChooseUs2Title: 'Inovação Constante',
+                whyChooseUs2Desc: 'Sempre na vanguarda das últimas tecnologias e tendências para garantir que seu negócio esteja um passo à frente.',
+                whyChooseUs3Title: 'Design Centrado no Usuário',
+                whyChooseUs3Desc: 'Criamos experiências intuitivas e atraentes que seus clientes amarão, garantindo alta usabilidade.',
+                whyChooseUs4Title: 'Resultados Mensuráveis',
+                whyChooseUs4Desc: 'Desenvolvemos soluções que geram um impacto real em seu crescimento e rentabilidade, com métricas claras.',
+                whyChooseUs5Title: 'Soporte Dedicado',
+                whyChooseUs5Desc: 'Uma equipe comprometida com seu éxito a longo prazo, oferecendo soporte e manutenção contínua.',
+                ctaTitle: 'Vamos conversar sobre seu próximo grande projeto digital!',
+                ctaSubtitle: 'Entre em contato com a Jonimind Agency hoje mesmo para uma consulta gratuita e descubra como podemos transformar sua presença digital.',
+                ctaButton: 'Entre em Contato Hoje',
+                ctaButtonHover: 'Envie um E-mail Agora!',
+                footerCopyright: '&copy; 2025 Jonimind Agency. Todos os derechos reservados.',
+                jokeSectionTitle: 'Chiste de Chuck Norris do Dia',
+                jokeContent: 'Carregando chiste...',
+                newJokeButton: 'Novo Chiste',
+                translatingJoke: 'Traduzindo chiste...',
+                fetchError: 'Erro ao carregar o conteúdo. Isso pode ser devido a restrições de rede ou do ambiente. Por favor, tente novamente mais tarde.',
+                sloganGenTitle: 'Gerador de Slogans ✨',
+                sloganGenDescription: 'Insira o nome da sua empresa ou produto e uma breve descrição para gerar slogans criativos.',
+                companyNamePlaceholder: 'Nome da empresa/produto',
+                companyDescPlaceholder: 'Ex: Agência de marketing digital, software de gerenciamento de projetos, cafeteria artesanal',
+                generateSlogansButton: 'Gerar Slogans ✨',
+                generatingSlogans: 'Gerando slogans...',
+                noSloganInputError: 'Por favor, insira o nome e a descrição da empresa/produto.',
+                // Game specific translations
+                gameTitle: 'Adivinhe a Palavra 🧠',
+                gameDescription: 'Tente adivinar a palabra oculta letra por letra. Boa sorte!',
+                guessedLettersLabel: 'Letras adivinhadas: ',
+                attemptsLeftLabel: 'Tentativas restantes: ',
+                letterInputPlaceholder: 'Letra',
+                guessButton: 'Adivinhar',
+                newGameButton: 'Novo Jogo',
+                gameMessageWin: 'Parabéns! Você adivinhou a palavra!',
+                gameMessageLose: 'Ah não! Você ficou sem tentativas. A palabra era: ',
+                gameMessageAlreadyGuessed: 'Você já adivinhou essa letra. Tente outra.',
+                gameMessageInvalidInput: 'Por favor, insira uma única letra válida.',
+                gameMessageCorrectGuess: 'Correto!',
+                gameMessageIncorrectGuess: 'Incorreto. Tente novamente.',
+                // Testimonials
+                testimonialsTitle: 'Depoimentos dos nossos clientes',
+                testimonial1Quote: '"A Jonimind Agency transformou nossa presença online. Sua equipe é profissional, criativa e sempre superou nossas expectativas."',
+                testimonial1Author: '- Ana G., CEO da TechSolutions',
+                testimonial2Quote: '"Sua abordagem estratégica nos ajudou a lançar nosso aplicativo com sucesso. Resultados incríveis e suporte imbatível!"',
+                testimonial2Author: '- Carlos M., Fundador da AppInnovate',
+                testimonial3Quote: '"A otimização do nosso site foi fenomenal. Vimos um aumento significativo no tráfego e nas conversões."',
+                testimonial3Author: '- Sofía L., Diretora de Marketing da EcoShop',
+                // Contact Form
+                contactNameLabel: 'Nome:',
+                contactEmailLabel: 'Email:',
+                contactMessageLabel: 'Mensagem:',
+                contactSubmitButton: 'Enviar Mensagem',
+                contactOrEmail: 'Ou envie-nos um email diretamente para:',
+                contactEmailLink: 'info@tudominio.com',
+                formSuccessMessage: 'Mensagem enviada com sucesso! Entraremos em contato em breve.',
+                formErrorMessage: 'Ocorreu um erro ao enviar sua mensagem. Por favor, tente novamente mais tarde.',
+            }
+        };
+
+        let currentLang = localStorage.getItem('lang') || 'es'; // Default to Spanish
+
+        // Game variables
+        const words = [
+            "casa", "perro", "gato", "sol", "luna", "agua", "pan", "flor", "rojo", "azul",
+            "verde", "mesa", "silla", "libro", "lapiz", "mano", "pie", "ojo", "boca", "nariz",
+            "dia", "noche", "amor", "paz", "feliz", "triste", "grande", "pequeno", "frio", "calor"
+        ];
+        let selectedWord = '';
+        let maskedWord = [];
+        let guessedLetters = new Set();
+        let attemptsLeft = 6; // Standard for hangman-like games
+        let gameActive = false;
+
+        // Element references (will be assigned in DOMContentLoaded)
+        let jokeContentElement, newJokeButton;
+        let companyNameInput, companyDescriptionInput, sloganOutput, generateSlogansButton, sloganSpinner;
+        let wordDisplay, guessedLettersDisplay, attemptsLeftDisplay, letterInput, guessButton, gameMessage, newGameButton;
+        let mobileMenuButton, mobileMenu;
+        let contactForm, formMessage; // New references for form handling
+
+
+        /**
+         * @function fetchChuckNorrisJoke
+         * @description Fetches a random Chuck Norris joke from an external API and translates it to the current language (Spanish) using Gemini API.
+         * Provides dynamic feedback by updating button text and showing/hiding a spinner.
+         * @returns {Promise<void>} A promise that resolves when the joke is fetched and displayed.
+         */
+        async function fetchChuckNorrisJoke() {
+            const originalButtonText = translations[currentLang]['newJokeButton'];
+            // Set loading text in the current language
+            jokeContentElement.textContent = translations[currentLang]['jokeContent'];
+            newJokeButton.disabled = true; // Disable button during fetch
+            newJokeButton.textContent = translations[currentLang]['translatingJoke']; // Dynamic text feedback
+
+            try {
+                console.log('Attempting to fetch Chuck Norris joke from: https://api.chucknorris.io/jokes/random');
+                const response = await fetch('https://api.chucknorris.io/jokes/random');
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error(`HTTP error! status: ${response.status}, response: ${errorText}`);
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const englishJoke = data.value;
+
+                // Update loading message for translation
+                jokeContentElement.textContent = translations[currentLang]['translatingJoke'];
+
+                // Call Gemini API for translation
+                let chatHistory = [];
+                const prompt = `Translate the following Chuck Norris joke into Spanish: "${englishJoke}"`;
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+
+                const payload = { contents: chatHistory };
+                // IMPORTANT: "AIzaSyBoEwvn0AozZfhVbxCtPNJFl2X6OI7RyIg"
+                const apiKey = "AIzaSyCV29iV_mj-9NO69OAzqcT4usBbbXNUURs"; 
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                console.log('Attempting to translate joke with Gemini API...');
+                const translateResponse = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!translateResponse.ok) {
+                    const errorData = await translateResponse.json();
+                    console.error('Gemini API HTTP error (translation):', translateResponse.status, errorData);
+                    throw new Error(`Gemini API translation error: ${errorData.error.message || translateResponse.statusText}`);
+                }
+
+                const translateResult = await translateResponse.json();
+                console.log('Gemini API response (translation):', translateResult);
+
+                if (translateResult.candidates && translateResult.candidates.length > 0 &&
+                    translateResult.candidates[0].content && translateResult.candidates[0].content.parts &&
+                    translateResult.candidates[0].content.parts.length > 0) {
+                    const spanishJoke = translateResult.candidates[0].content.parts[0].text;
+                    jokeContentElement.textContent = `"${spanishJoke}"`;
+                } else {
+                    jokeContentElement.textContent = 'No se pudo traducir el chiste. Inténtalo de nuevo.';
+                    if (currentLang === 'pt-br') {
+                        jokeContentElement.textContent = 'Não foi possível traduzir o chiste. Tente novamente.';
+                    }
+                }
+
+            } catch (error) {
+                console.error('Error fetching or translating joke:', error);
+                jokeContentElement.textContent = translations[currentLang]['fetchError'];
+            } finally {
+                newJokeButton.disabled = false; // Re-enable button
+                newJokeButton.textContent = originalButtonText; // Restore original button text
+            }
+        }
+
+        /**
+         * @function generateSlogans
+         * @description Generates marketing slogans using the Gemini API based on company name and description.
+         * Provides dynamic feedback by updating button text, showing/hiding a spinner, and disabling the button.
+         * @returns {Promise<void>} A promise that resolves when slogans are generated and displayed.
+         */
+        async function generateSlogans() {
+            const originalButtonText = translations[currentLang]['generateSlogansButton'];
+            const companyName = companyNameInput.value.trim();
+            const companyDescription = companyDescriptionInput.value.trim();
+
+            if (!companyName || !companyDescription) {
+                sloganOutput.textContent = translations[currentLang]['noSloganInputError'];
+                return;
+            }
+
+            // Show loading state
+            generateSlogansButton.disabled = true;
+            generateSlogansButton.textContent = translations[currentLang]['generatingSlogans']; // Dynamic text feedback
+            sloganSpinner.classList.remove('hidden');
+            sloganOutput.textContent = translations[currentLang]['generatingSlogans'];
+
+            try {
+                let chatHistory = [];
+                const prompt = `Generate 5 marketing slogans for a "${companyDescription}" company/product named "${companyName}". Provide only the slogans, each on a new line.`;
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                
+                const payload = { contents: chatHistory };
+                // IMPORTANT: Inserta tu clave de API de Gemini aquí. Puedes obtenerla en https://aistudio.google.com/app/apikey
+                const apiKey = "AIzaSyCV29iV_mj-9NO69OAzqcT4usBbbXNUURs"; 
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                console.log('Attempting to fetch slogans from Gemini API...');
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error('Gemini API HTTP error (slogans):', response.status, errorData);
+                    throw new Error(`Gemini API error: ${errorData.error.message || response.statusText}`);
+                }
+
+                const result = await response.json();
+                console.log('Gemini API response (slogans):', result);
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    sloganOutput.textContent = text;
+                } else {
+                    sloganOutput.textContent = 'No se pudieron generar slogans. Inténtalo de nuevo.';
+                    if (currentLang === 'pt-br') {
+                        sloganOutput.textContent = 'Não foi possível gerar slogans. Tente novamente.';
+                    }
+                }
+
+            } catch (error) {
+                console.error('Error generating slogans:', error);
+                sloganOutput.textContent = translations[currentLang]['fetchError'];
+            } finally {
+                generateSlogansButton.disabled = false;
+                generateSlogansButton.textContent = originalButtonText; // Restore original button text
+                sloganSpinner.classList.add('hidden');
+            }
+        }
+
+        /* --- Guess The Word Game Functions --- */
+
+        /**
+         * @function initializeGame
+         * @description Initializes a new game of Guess the Word. Selects a random word, masks it,
+         * resets guessed letters and attempts, and updates the game display.
+         * Reveals a few letters initially to make the game easier.
+         * @returns {void}
+         */
+        function initializeGame() {
+            selectedWord = words[Math.floor(Math.random() * words.length)].toUpperCase();
+            maskedWord = Array(selectedWord.length).fill('_');
+            guessedLetters = new Set();
+            attemptsLeft = 6; // Standard for hangman-like games
+            gameActive = true;
+
+            // Reveal a few letters initially to make it easier
+            const lettersToReveal = Math.floor(selectedWord.length / 3); // Reveal about 1/3 of letters
+            for (let i = 0; i < lettersToReveal; i++) {
+                let randomIndex = Math.floor(Math.random() * selectedWord.length);
+                let letter = selectedWord[randomIndex];
+                if (!guessedLetters.has(letter)) {
+                    guessedLetters.add(letter);
+                    for (let j = 0; j < selectedWord.length; j++) {
+                        if (selectedWord[j] === letter) {
+                            maskedWord[j] = letter;
+                        }
+                    }
+                }
+            }
+
+            updateGameDisplay();
+            gameMessage.textContent = '';
+            letterInput.value = '';
+            letterInput.disabled = false;
+            guessButton.disabled = false;
+            newGameButton.classList.add('hidden');
+            letterInput.focus();
+        }
+
+        /**
+         * @function updateGameDisplay
+         * @description Updates the game display elements: masked word, guessed letters, and attempts left.
+         * @returns {void}
+         */
+        function updateGameDisplay() {
+            wordDisplay.textContent = maskedWord.join(' ');
+            guessedLettersDisplay.textContent = `${translations[currentLang]['guessedLettersLabel']}${Array.from(guessedLetters).sort().join(', ')}`;
+            attemptsLeftDisplay.textContent = `${translations[currentLang]['attemptsLeftLabel']}${attemptsLeft}`;
+        }
+
+        /**
+         * @function guessLetter
+         * @description Handles a letter guess from the user. Validates input, checks if the letter has been guessed,
+         * updates game state, and provides feedback messages.
+         * @returns {void}
+         */
+        function guessLetter() {
+            if (!gameActive) return;
+
+            const guess = letterInput.value.toUpperCase().trim();
+            letterInput.value = ''; // Clear input field
+
+            if (guess.length !== 1 || !/^[A-ZÑÁÉÍÓÚÜ]$/.test(guess)) {
+                gameMessage.textContent = translations[currentLang]['gameMessageInvalidInput'];
+                return;
+            }
+
+            if (guessedLetters.has(guess)) {
+                gameMessage.textContent = translations[currentLang]['gameMessageAlreadyGuessed'];
+                return;
+            }
+
+            guessedLetters.add(guess);
+            gameMessage.textContent = ''; // Clear previous message
+
+            if (selectedWord.includes(guess)) {
+                for (let i = 0; i < selectedWord.length; i++) {
+                    if (selectedWord[i] === guess) {
+                        maskedWord[i] = guess;
+                    }
+                }
+                gameMessage.textContent = translations[currentLang]['gameMessageCorrectGuess'];
+            } else {
+                attemptsLeft--;
+                gameMessage.textContent = translations[currentLang]['gameMessageIncorrectGuess'];
+            }
+
+            updateGameDisplay();
+            checkGameEnd();
+        }
+
+        /**
+         * @function checkGameEnd
+         * @description Checks if the game has ended (either by winning or losing) and triggers the end game state.
+         * @returns {void}
+         */
+        function checkGameEnd() {
+            if (maskedWord.join('') === selectedWord) {
+                gameMessage.textContent = translations[currentLang]['gameMessageWin'];
+                gameMessage.style.color = '#16a34a'; // Green color for win
+                endGame();
+            } else if (attemptsLeft <= 0) {
+                gameMessage.textContent = `${translations[currentLang]['gameMessageLose']}${selectedWord}`;
+                gameMessage.style.color = '#dc2626'; // Red color for lose
+                endGame();
+            }
+        }
+
+        /**
+         * @function endGame
+         * @description Ends the current game, disabling user inputs and showing the "New Game" button.
+         * @returns {void}
+         */
+        function endGame() {
+            gameActive = false;
+            letterInput.disabled = true;
+            guessButton.disabled = true;
+            newGameButton.classList.remove('hidden');
+        }
+
+        /* --- End Guess The Word Game Functions --- */
+
+
+        /**
+         * @function setLanguage
+         * @description Sets the language of the entire page based on the provided language code.
+         * Updates all text content with `data-key` attributes, image alt texts, and button styles.
+         * Also triggers a re-fetch of the Chuck Norris joke and re-initializes the game to update their language.
+         * @param {string} lang - The language code ('es' for Spanish, 'pt-br' for Brazilian Portuguese).
+         * @returns {void}
+         */
+        function setLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('lang', lang);
+
+            // Update page title
+            document.title = translations[lang]['pageTitle'];
+
+            // Update elements with data-key attributes
+            document.querySelectorAll('[data-key]').forEach(element => {
+                const key = element.getAttribute('data-key');
+                if (translations[lang][key]) {
+                    // Special handling for the CTA button text on hover
+                    if (key === 'heroCta' || key === 'ctaButton') {
+                        element.textContent = translations[lang][key];
+                        element.onmouseover = () => element.textContent = translations[lang][key + 'Hover'];
+                        element.onmouseout = () => element.textContent = translations[lang][key];
+                    } else if (key === 'toggleButton') {
+                         // For toggle buttons, preserve the icon and update text
+                        const isExpanded = element.classList.contains('expanded');
+                        if (isExpanded) {
+                            element.innerHTML = translations[currentLang]['toggleButtonLess'] + ' <i data-lucide="chevron-up" class="w-5 h-5"></i>';
+                        } else {
+                            element.innerHTML = translations[currentLang]['toggleButton'] + ' <i data-lucide="chevron-down" class="w-5 h-5"></i>';
+                        }
+                        lucide.createIcons(); // Re-render icon
+                    }
+                    else if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                        element.placeholder = translations[lang][key];
+                    }
+                    else {
+                        element.textContent = translations[lang][key];
+                    }
+                }
+            });
+
+            // Update image alt text (if heroImageAlt is added to translations)
+            const heroImage = document.querySelector('.hero-section img');
+            if (heroImage && translations[lang]['heroImageAlt']) {
+                heroImage.alt = translations[lang]['heroImageAlt'];
+            }
+
+            // Update language button styles for desktop and mobile
+            const langEsButton = document.getElementById('lang-es');
+            const langPtBrButton = document.getElementById('lang-pt-br');
+            const mobileLangEsButton = document.getElementById('mobile-lang-es');
+            const mobileLangPtBrButton = document.getElementById('mobile-lang-pt-br');
+
+
+            const updateButtonStyles = (esBtn, ptBrBtn, currentLang) => {
+                if (esBtn && ptBrBtn) {
+                    esBtn.classList.remove('bg-blue-500', 'text-white', 'bg-gray-200', 'text-gray-700');
+                    ptBrBtn.classList.remove('bg-blue-500', 'text-white', 'bg-gray-200', 'text-gray-700');
+
+                    if (currentLang === 'es') {
+                        esBtn.classList.add('bg-blue-500', 'text-white');
+                        ptBrBtn.classList.add('bg-gray-200', 'text-gray-700');
+                    } else {
+                        ptBrBtn.classList.add('bg-blue-500', 'text-white');
+                        esBtn.classList.add('bg-gray-200', 'text-gray-700');
+                    }
+                }
+            };
+
+            updateButtonStyles(langEsButton, langPtBrButton, lang);
+            updateButtonStyles(mobileLangEsButton, mobileLangPtBrButton, lang);
+
+
+            lucide.createIcons(); // Re-render icons after text changes
+            
+            // Re-fetch Chuck Norris joke to update its language
+            if (jokeContentElement && newJokeButton) {
+                fetchChuckNorrisJoke();
+            }
+            
+            // Clear API related outputs and inputs on language change
+            if (sloganOutput) sloganOutput.textContent = '';
+            if (companyNameInput) companyNameInput.value = '';
+            if (companyDescriptionInput) companyDescriptionInput.value = '';
+
+            // Re-initialize game to update its language
+            initializeGame();
+        }
+
+        // Ensure all DOM-related operations run after the document is fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initial render of Lucide icons
+            lucide.createIcons();
+
+            // Get all necessary DOM elements once, after the document is loaded
+            jokeContentElement = document.getElementById('joke-content');
+            newJokeButton = document.getElementById('new-joke-button');
+            companyNameInput = document.getElementById('company-name-input');
+            companyDescriptionInput = document.getElementById('company-description-input');
+            sloganOutput = document.getElementById('slogan-output');
+            generateSlogansButton = document.getElementById('generate-slogans-button');
+            sloganSpinner = document.getElementById('slogan-spinner'); 
+            
+            // Game elements
+            wordDisplay = document.getElementById('word-display');
+            guessedLettersDisplay = document.getElementById('guessed-letters-display');
+            attemptsLeftDisplay = document.getElementById('attempts-left-display');
+            letterInput = document.getElementById('letter-input');
+            guessButton = document.getElementById('guess-button');
+            gameMessage = document.getElementById('game-message');
+            newGameButton = document.getElementById('new-game-button');
+
+            // Mobile menu elements
+            mobileMenuButton = document.getElementById('mobile-menu-button');
+            mobileMenu = document.getElementById('mobile-menu');
+
+            // Contact form elements
+            contactForm = document.getElementById('contact-form');
+            formMessage = document.getElementById('form-message');
+
+
+            // Set initial language based on localStorage or default
+            // This will also trigger the initial joke fetch and game initialization
+            setLanguage(currentLang);
+
+            // Event listeners for language buttons
+            const langEsButton = document.getElementById('lang-es');
+            const langPtBrButton = document.getElementById('lang-pt-br');
+            const mobileLangEsButton = document.getElementById('mobile-lang-es');
+            const mobileLangPtBrButton = document.getElementById('mobile-lang-pt-br');
+
+            if (langEsButton) langEsButton.addEventListener('click', () => setLanguage('es'));
+            if (langPtBrButton) langPtBrButton.addEventListener('click', () => setLanguage('pt-br'));
+            if (mobileLangEsButton) mobileLangEsButton.addEventListener('click', () => setLanguage('es'));
+            if (mobileLangPtBrButton) mobileLangPtBrButton.addEventListener('click', () => setLanguage('pt-br'));
+
+
+            // Event listener for new joke button
+            if (newJokeButton) { // Check for existence before adding listener
+                newJokeButton.addEventListener('click', fetchChuckNorrisJoke);
+            } else {
+                console.error('Error: New joke button not found during DOMContentLoaded.');
+            }
+
+            // Event listener for slogan generation button
+            if (generateSlogansButton) { // Check for existence before adding listener
+                generateSlogansButton.addEventListener('click', generateSlogans);
+            } else {
+                console.error('Error: Slogan generator button not found during DOMContentLoaded.');
+            }
+
+            // Game event listeners
+            if (guessButton && letterInput) {
+                guessButton.addEventListener('click', guessLetter);
+                letterInput.addEventListener('keypress', function(event) {
+                    if (event.key === 'Enter') {
+                        guessLetter();
+                    }
+                });
+            } else {
+                console.error('Error: Game guess button or letter input not found during DOMContentLoaded.');
+            }
+            if (newGameButton) {
+                newGameButton.addEventListener('click', initializeGame);
+            } else {
+                console.error('Error: New game button not found during DOMContentLoaded.');
+            }
+
+            // JavaScript for collapsible modules
+            const toggleButtons = document.querySelectorAll('.toggle-button');
+
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const content = this.previousElementSibling; // The div containing the detailed content
+                    
+                    content.classList.toggle('expanded');
+                    this.classList.toggle('expanded');
+
+                    // Rebuild the button's innerHTML completely to ensure robustness
+                    if (content.classList.contains('expanded')) {
+                        this.innerHTML = translations[currentLang]['toggleButtonLess'] + ' <i data-lucide="chevron-up" class="w-5 h-5"></i>';
+                    } else {
+                        this.innerHTML = translations[currentLang]['toggleButton'] + ' <i data-lucide="chevron-down" class="w-5 h-5"></i>';
+                    }
+                    lucide.createIcons(); // Re-render icon after changing innerHTML
+                });
+            });
+
+            // Mobile menu toggle logic
+            if (mobileMenuButton && mobileMenu) {
+                mobileMenuButton.addEventListener('click', function() {
+                    mobileMenu.classList.toggle('active');
+                    const icon = mobileMenuButton.querySelector('i');
+                    if (mobileMenu.classList.contains('active')) {
+                        icon.setAttribute('data-lucide', 'x'); // Set data-lucide attribute to 'x'
+                    } else {
+                        icon.setAttribute('data-lucide', 'menu'); // Set data-lucide attribute to 'menu'
+                    }
+                    lucide.createIcons(); // Re-render icon based on new data-lucide attribute
+                });
+
+                // Close mobile menu when a link is clicked
+                mobileMenu.querySelectorAll('a').forEach(link => {
+                    link.addEventListener('click', () => {
+                        mobileMenu.classList.remove('active');
+                        const icon = mobileMenuButton.querySelector('i');
+                        icon.setAttribute('data-lucide', 'menu'); // Set data-lucide attribute back to 'menu'
+                        lucide.createIcons(); // Re-render icon
+                    });
+                });
+            }
+
+            // Handle contact form submission
+            if (contactForm && formMessage) {
+                contactForm.addEventListener('submit', async function(event) {
+                    event.preventDefault(); // Prevent default form submission
+
+                    formMessage.textContent = ''; // Clear previous messages
+                    formMessage.classList.remove('text-green-600', 'text-red-600');
+
+                    const formData = new FormData(contactForm);
+                    const formUrl = contactForm.action;
+
+                    try {
+                        const response = await fetch(formUrl, {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'Accept': 'application/json'
+                            }
+                        });
+
+                        if (response.ok) {
+                            formMessage.textContent = translations[currentLang]['formSuccessMessage'];
+                            formMessage.classList.add('text-green-600');
+                            contactForm.reset(); // Clear form fields
+                        } else {
+                            const errorData = await response.json();
+                            console.error('Formspree error:', errorData);
+                            formMessage.textContent = translations[currentLang]['formErrorMessage'];
+                            formMessage.classList.add('text-red-600');
+                        }
+                    } catch (error) {
+                        console.error('Network or submission error:', error);
+                        formMessage.textContent = translations[currentLang]['formErrorMessage'];
+                        formMessage.classList.add('text-red-600');
+                    }
+                });
+            }
+        });
+
+        // Scroll to the top of the page only on initial load
+        window.addEventListener('load', function() {
+            if (!window.location.hash) { // Only scroll to top if there's no hash in the URL
+                window.scrollTo(0, 0);
+            }
+        });
+    </script>
+</body>
+</html>
